@@ -1,0 +1,12 @@
+{
+  "name": "node-js-practice",
+  "version": "1.0.0",
+  "description": "Practice project for learning Node.js fundamentals and asynchronous programming.",
+  "license": "ISC",
+  "author": "Abdul Kadir Khan",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
