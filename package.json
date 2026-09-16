@@ -4,9 +4,13 @@
   "description": "Practice project for learning Node.js fundamentals and asynchronous programming.",
   "license": "ISC",
   "author": "Abdul Kadir Khan",
-  "type": "commonjs",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
   }
 }
