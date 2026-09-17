@@ -8,10 +8,11 @@ const app = express();
 
 const PORT = 3000;
 
+app.use(express.json());
 app.use('/',basicRouter);
 app.use('/api',routeParameter);
 app.use('/query',queryParameter);
-app.use('/post',postQuery);
+app.use('/api',postQuery);
 
 app.listen(PORT,()=>{
     console.log(`Server is running on ${PORT}`);
