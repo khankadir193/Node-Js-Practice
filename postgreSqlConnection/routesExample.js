@@ -1,9 +1,10 @@
 import express from 'express';
-import db from './Services/db.js';
+import db from '../Services/db.js';
 
-const app = express();
+const router = express.Router();
 
-app.get('/',async (req,res)=>{
+router.get('/',async (req,res)=>{
+    // console.log('db..-----',db.query);
     try{
         const result = await db.query('SELECT * FROM customers');
         // console.log('result .....',result.rows);
@@ -14,6 +15,4 @@ app.get('/',async (req,res)=>{
     }
 });
 
-app.listen(5000,()=>{
-    console.log('Server running on port 5000');
-})
+export default router;
