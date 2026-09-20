@@ -33,6 +33,34 @@ router.post('/createRecord', async (req, res) => {
             message: "Insert getting errro."
         })
     }
-})
+});
+
+router.post('/createTable', async (req, res) => {
+    try {
+        const { tableName,columns } = req.body;
+
+        if(!tableName || !columns || typeof columns !== 'object'){
+            return res.status(400).json({message:"tableName and columns are required"});
+        }
+        const columnDefinitions = Object.entries(columns).map(([columnName,dataType])=>{
+            return `"${columnName}" ${dataType}`
+        }).join(', ');
+
+        console.log('column definitons ....',columnDefinitions);
+
+        const query = `CREATE TABLE "${tableName}" (${columnDefinitions})`; 
+        await db.query(query);
+
+        res.status(201).json({
+            message:`Table "${tableName} created successfully..."`
+        });
+    } catch (err) {
+        console.log('Inser is getting the error', err);
+        res.status(500).json({
+            message: "Insert getting errro."
+        })
+    }
+
+});
 
 export default router;
