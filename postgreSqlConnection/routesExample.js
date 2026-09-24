@@ -10,8 +10,8 @@ router.get('/', async (req, res) => {
         // console.log('result .....',result.rows);
         res.json(result.rows);
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ message: 'Database error' });
+        // console.log(err);
+        res.status(500).json({ message: `Fetch Data:- ${err}` });
     }
 });
 
@@ -28,9 +28,9 @@ router.post('/createRecord', async (req, res) => {
 
         res.status(201).json(result.rows);
     } catch (err) {
-        console.log('Inser is getting the error', err);
+        // console.log('Inser is getting the error', err);
         res.status(500).json({
-            message: "Insert getting errro."
+            message: `Insertion getting errro:- ${err}`
         })
     }
 });
@@ -46,7 +46,7 @@ router.post('/createTable', async (req, res) => {
             return `"${columnName}" ${dataType}`
         }).join(', ');
 
-        console.log('column definitons ....',columnDefinitions);
+        // console.log('column definitons ....',columnDefinitions);
 
         const query = `CREATE TABLE "${tableName}" (${columnDefinitions})`; 
         await db.query(query);
@@ -55,9 +55,9 @@ router.post('/createTable', async (req, res) => {
             message:`Table "${tableName} created successfully..."`
         });
     } catch (err) {
-        console.log('Inser is getting the error', err);
+        // console.log('Inser is getting the error', err);
         res.status(500).json({
-            message: "Insert getting errro."
+            message: `Table creation getting error:- .${err}`
         })
     }
 
