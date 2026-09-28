@@ -10,7 +10,7 @@ app.get('/api/neon', async (req, res) => {
         console.log('result...', result.rows);
         res.status(200).json({
             message: "Data Fetched Successfully...",
-            result:result.rows
+            result: result.rows
         })
     } catch (err) {
         res.status(500).json({
@@ -39,8 +39,9 @@ app.post('/api/insertRecord', async (req, res) => {
     }
 });
 
-const PORT = process.env.NEON_PORT || 5000;
-
-app.listen(PORT, () => {
-    console.log('server running on this port :-', PORT);
-});
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.NEON_PORT || 5000;
+    app.listen(PORT, () => {
+        console.log('server running on this port :-', PORT);
+    })
+}
