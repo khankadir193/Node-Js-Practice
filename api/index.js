@@ -4,6 +4,18 @@ const app = express();
 
 app.use(express.json());
 
+app.get('/health',(req,res)=>{
+    try{
+        res.status(200).json({
+            message:"Node js REST Api is running successfully."
+        })
+    }catch(err){
+        res.status(500).json({
+            message:"Node js REST Api Failed."
+        })
+    }
+});
+
 app.get('/api/neon', async (req, res) => {
     try {
         const result = await neonConnect.query('SELECT * FROM customers');
