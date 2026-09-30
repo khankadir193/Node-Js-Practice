@@ -4,14 +4,14 @@ const app = express();
 
 app.use(express.json());
 
-app.get('/health',(req,res)=>{
-    try{
+app.get('/health', (req, res) => {
+    try {
         res.status(200).json({
-            message:"Node js REST Api is running successfully."
+            message: "Node js REST Api is running successfully."
         })
-    }catch(err){
+    } catch (err) {
         res.status(500).json({
-            message:"Node js REST Api Failed."
+            message: "Node js REST Api Failed."
         })
     }
 });
@@ -47,6 +47,128 @@ app.post('/api/insertRecord', async (req, res) => {
         // console.log('Inser is getting the error', err);
         res.status(500).json({
             message: `Insertion getting errro:- ${err}`
+        })
+    }
+});
+
+app.put('/api/updateRecord/:id', async (req, res) => {
+    try {
+        const { name, contact, address, city, postalCode, country } = req.body;
+        // console.log('...name', name, '...contact.', contact);
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({
+                message: 'Customer ID required.'
+            })
+        }
+
+        const result = await neonConnect.query(`UPDATE customers 
+            SET customer_name = $1,contact_name = $2,customer_address = $3,city = $4,postal_code = $5,country = $6 WHERE customer_id = $7 RETURNING *`
+            , [name, contact, address, city, postalCode, country, id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                message: 'Record not found.'
+            })
+        }
+
+        res.status(200).json({ message: 'Record update successfully', data: result.rows[0] });
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
+app.patch('/api/patchRecord/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const allowedFields = {
+            name: 'customer_name',
+            contact: 'contact_name',
+            address: 'customer_address',
+            city: 'city',
+            postalCode: 'postal_code',
+            country: 'country'
+        };
+
+        const fields = Object.keys(req.body);
+        if (fields.length === 0) {
+            return res.status(400).json({
+                message: "No fields provided for update."
+            })
+        }
+
+        const invalidFields = fields.filter(field => !allowedFields[field]);
+        if (invalidFields.length > 0) {
+            return res.status(400).json({
+                message: `Invalid fields ${invalidFields.join(', ')}`
+            });
+        }
+
+        const setQuery = fields
+            .map((field, index) => `${allowedFields[field]} = $${index + 1}`)
+            .join(', ');
+
+        const values = fields.map(field => req.body[field]);
+        values.push(id);
+
+        const result = await neonConnect.query(
+            `UPDATE customers
+             SET ${setQuery}
+             WHERE customer_id = $${values.length}
+             RETURNING *`,
+            values
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                message: 'Record not found.'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Record updated successfully.',
+            data: result.rows[0]
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
+app.delete('/api/deleteRecord/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        console.log('id....---', id);
+
+        if (!id) {
+            res.status(400).json({
+                message: "Customer ID is required."
+            })
+        }
+
+        const result = await neonConnect.query(`DELETE FROM customers 
+            WHERE customer_id = $1 RETURNING *`, [id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                message: "Record not found"
+            })
+        }
+
+        res.status(200).json({
+            message: 'Record deleted successfully.',
+            data: result.rows[0]
+        })
+
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
         })
     }
 });
