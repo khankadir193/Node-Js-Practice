@@ -39,6 +39,63 @@ app.post('/api/insertRecord', async (req, res) => {
     }
 });
 
+app.put('/api/updateRecord/:id', async (req, res) => {
+    try {
+        const { name, contact, address, city, postalCode, country } = req.body;
+        // console.log('...name', name, '...contact.', contact);
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({
+                message: 'Customer ID required.'
+            })
+        }
+
+        const result = await neonConnect.query(`UPDATE customers 
+            SET customer_name = $1,contact_name = $2,customer_address = $3,city = $4,postal_code = $5,country = $6 WHERE customer_id = $7 RETURNING *`
+            , [name, contact, address, city, postalCode, country, id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                message: 'Record not found.'
+            })
+        }
+
+        res.status(200).json({ message: 'Record update successfully', data: result.rows[0] });
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
+app.patch('/api/patchRecord/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name } = req.body;
+
+        const result = await neonConnect.query(`UPDATE customers 
+            SET customer_name = $1 WHERE customer_id = $2 RETURNING *`, [name, id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Record not found.' });
+        }
+
+        res.status(200).json({
+            message: 'Record updated successfully.',
+            data: result.rows[0]
+        });
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        });
+    }
+});
+
+// app.delete('/api/deleteRecord', () => {
+
+// });
+
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.NEON_PORT || 5000;
     app.listen(PORT, () => {
