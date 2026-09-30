@@ -128,9 +128,38 @@ app.patch('/api/patchRecord/:id', async (req, res) => {
     }
 });
 
-// app.delete('/api/deleteRecord', () => {
+app.delete('/api/deleteRecord/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
 
-// });
+        console.log('id....---',id);
+
+        if (!id) {
+            res.status(400).json({
+                message: "Customer ID is required."
+            })
+        }
+
+        const result = await neonConnect.query(`DELETE FROM customers 
+            WHERE customer_id = $1 RETURNING *`,[id]);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({
+                message: "Record not found"
+            })
+        }
+
+        res.status(200).json({
+            message: 'Record deleted successfully.',
+            data: result.rows[0]
+        })
+
+    } catch (err) {
+        res.status(500).json({
+            message: err.message
+        })
+    }
+});
 
 if (process.env.NODE_ENV !== 'production') {
     const PORT = process.env.NEON_PORT || 5000;
