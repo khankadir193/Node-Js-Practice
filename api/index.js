@@ -17,9 +17,24 @@ app.get('/health', (req, res) => {
 });
 
 app.get('/api/neon', async (req, res) => {
+    const { id } = req.params;
     try {
-        const result = await neonConnect.query('SELECT * FROM customers');
-        console.log('result...', result.rows);
+        const customerId = Number(id);
+
+        if(!Number.isInteger(customerId)){
+            return res.status().json({
+                message:'Invalid customer id'
+            })
+        }
+
+        const result = await neonConnect.query(`SELECT * FROM customers WHERE customer_id = $1`,[customerId]);
+
+        if(result.rows.length === 0){
+            return res.status(404).json({
+                message:'Customer not found'
+            })
+        }
+
         res.status(200).json({
             message: "Data Fetched Successfully...",
             result: result.rows

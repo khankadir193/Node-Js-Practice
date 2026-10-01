@@ -4,10 +4,27 @@ const app = express();
 
 app.use(express.json());
 
-app.get('/api/neon', async (req, res) => {
+app.get('/api/neon/:id', async (req, res) => {
+    const { id } = req.params;
     try {
-        const result = await neonConnect.query('SELECT * FROM customers');
+        const customerId = Number(id);
+        console.log('customer id..',customerId);
+
+        if (!Number.isInteger(customerId)) {
+            return res.status(400).json({
+                message: 'Invalid customer Id'
+            })
+        }
+
+        const result = await neonConnect.query(`SELECT * FROM customers WHERE customer_id = $1`, [customerId]);
         console.log('result...', result.rows);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                message: 'Customer not found'
+            })
+        }
+
         res.status(200).json({
             message: "Data Fetched Successfully...",
             result: result.rows
@@ -132,7 +149,7 @@ app.delete('/api/deleteRecord/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        console.log('id....---',id);
+        console.log('id....---', id);
 
         if (!id) {
             res.status(400).json({
@@ -141,7 +158,7 @@ app.delete('/api/deleteRecord/:id', async (req, res) => {
         }
 
         const result = await neonConnect.query(`DELETE FROM customers 
-            WHERE customer_id = $1 RETURNING *`,[id]);
+            WHERE customer_id = $1 RETURNING *`, [id]);
 
         if (result.rowCount === 0) {
             return res.status(404).json({
