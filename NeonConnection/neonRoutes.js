@@ -17,7 +17,8 @@ app.get('/api/neon/', async (req, res) => {
 
         res.status(200).json({
             message: "Data Fetched Successfully...",
-            result: result.rows
+            result: result.rows,
+            length:result.rowCount
         })
     } catch (err) {
         res.status(500).json({
@@ -49,7 +50,8 @@ app.get('/api/neon/:id', async (req, res) => {
 
         res.status(200).json({
             message: "Data Fetched Successfully...",
-            result: result.rows
+            result: result.rows,
+            length:result.rowCount
         })
     } catch (err) {
         res.status(500).json({
