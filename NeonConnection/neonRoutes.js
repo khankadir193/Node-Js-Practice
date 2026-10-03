@@ -17,8 +17,8 @@ app.get('/api/neon/', async (req, res) => {
 
         res.status(200).json({
             message: "Data Fetched Successfully...",
-            result: result.rows,
-            length:result.rowCount
+            data: result.rows,
+            length: result.rowCount
         })
     } catch (err) {
         res.status(500).json({
@@ -31,7 +31,7 @@ app.get('/api/neon/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const customerId = Number(id);
-        console.log('customer id..',customerId);
+        console.log('customer id..', customerId);
 
         if (!Number.isInteger(customerId)) {
             return res.status(400).json({
@@ -50,8 +50,8 @@ app.get('/api/neon/:id', async (req, res) => {
 
         res.status(200).json({
             message: "Data Fetched Successfully...",
-            result: result.rows,
-            length:result.rowCount
+            data: result.rows,
+            length: result.rowCount
         })
     } catch (err) {
         res.status(500).json({
@@ -176,9 +176,9 @@ app.delete('/api/deleteRecord/:id', async (req, res) => {
         console.log('id....---', id);
 
         if (!id) {
-            res.status(400).json({
+            return res.status(400).json({
                 message: "Customer ID is required."
-            })
+            });
         }
 
         const result = await neonConnect.query(`DELETE FROM customers 

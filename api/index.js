@@ -29,7 +29,7 @@ app.get('/api/neon/', async (req, res) => {
 
         res.status(200).json({
             message: "Data Fetched Successfully...",
-            result: result.rows,
+            data: result.rows,
             length:result.rowCount
         })
     } catch (err) {
@@ -60,7 +60,7 @@ app.get('/api/neon/:id', async (req, res) => {
 
         res.status(200).json({
             message: "Data Fetched Successfully...",
-            result: result.rows,
+            data: result.rows,
             length:result.rowCount
         })
     } catch (err) {
@@ -186,7 +186,7 @@ app.delete('/api/deleteRecord/:id', async (req, res) => {
         console.log('id....---', id);
 
         if (!id) {
-            res.status(400).json({
+            return res.status(400).json({
                 message: "Customer ID is required."
             })
         }
