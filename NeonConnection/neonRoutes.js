@@ -6,8 +6,31 @@ app.use(express.json());
 
 app.get('/api/neon/', async (req, res) => {
     try {
-        const result = await neonConnect.query('SELECT * FROM customers');
-        console.log('result...', result.rows);
+        const { page = 1, limit = 10 } = req.query;
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        if (!Number.isInteger(pageNumber) || !Number.isInteger(limitNumber) || limitNumber < 1 || pageNumber < 1) {
+            return res.status(400).json({
+                message: 'Page and limit must be a positive number.'
+            });
+        }
+
+        if (limitNumber > 100) {
+            return res.status(400).json({
+                message: 'Limit can not be greater than 100.'
+            })
+        }
+
+        const offset = (pageNumber - 1) * limitNumber;
+
+        const result = await neonConnect.query(`SELECT * FROM customers
+            ORDER BY customer_id LIMIT $1 OFFSET $2`, [limitNumber, offset]);
+
+        const countResult = await neonConnect.query('SELECT COUNT (*) FROM customers');
+
+        const total = Number(countResult.rows[0].count);
+        const totalPages = Number(Math.ceil(total / limitNumber));
 
         if (result.rows.length === 0) {
             return res.status(404).json({
@@ -16,10 +39,16 @@ app.get('/api/neon/', async (req, res) => {
         }
 
         res.status(200).json({
-            message: "Data Fetched Successfully...",
+            message: "Customer data Fetched Successfully.",
             data: result.rows,
-            length: result.rowCount
-        })
+            pagination: {
+                page: pageNumber,
+                limit: limitNumber,
+                total: total,
+                totalPages: totalPages,
+                count: result.rowCount
+            }
+        });
     } catch (err) {
         res.status(500).json({
             message: 'Neon Data base Error'
@@ -49,7 +78,7 @@ app.get('/api/neon/:id', async (req, res) => {
         }
 
         res.status(200).json({
-            message: "Data Fetched Successfully...",
+            message: "Customer data Fetched Successfully.",
             data: result.rows,
             length: result.rowCount
         })
@@ -71,7 +100,10 @@ app.post('/api/insertRecord', async (req, res) => {
             VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *
         `, [id, name, contact, address, city, postalCode, country]);
 
-        res.status(201).json(result.rows);
+        res.status(201).json({
+            message:'Customer record created successfully.',
+            data:result.rows
+        });
     } catch (err) {
         // console.log('Inser is getting the error', err);
         res.status(500).json({
@@ -102,7 +134,7 @@ app.put('/api/updateRecord/:id', async (req, res) => {
             })
         }
 
-        res.status(200).json({ message: 'Record update successfully', data: result.rows[0] });
+        res.status(200).json({ message: 'Customer record update successfully.', data: result.rows[0] });
     } catch (err) {
         res.status(500).json({
             message: err.message
@@ -191,7 +223,7 @@ app.delete('/api/deleteRecord/:id', async (req, res) => {
         }
 
         res.status(200).json({
-            message: 'Record deleted successfully.',
+            message: 'Customer record deleted successfully.',
             data: result.rows[0]
         })
 
