@@ -101,14 +101,14 @@ app.get('/api/neon/:id', async (req, res) => {
 
 app.post('/api/insertRecord', async (req, res) => {
     try {
-        const { id, name, contact, address, city, postalCode, country } = req.body;
+        const { name, contact, address, city, postalCode, country } = req.body;
 
         // console.log('id', id, 'name', name, 'contact', contact, 'address', address);
 
         const result = await neonConnect.query(`
-            INSERT INTO customers (customer_id,customer_name,contact_name,customer_address,city,postal_code,country)
-            VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *
-        `, [id, name, contact, address, city, postalCode, country]);
+            INSERT INTO customers (customer_name,contact_name,customer_address,city,postal_code,country)
+            VALUES($1,$2,$3,$4,$5,$6) RETURNING *
+        `, [name, contact, address, city, postalCode, country]);
 
         res.status(201).json({
             message: 'Customer record created successfully.',
