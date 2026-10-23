@@ -1,45 +1,55 @@
 
 import "dotenv/config";
 import express from "express";
-import { GoogleGenAI } from "@google/genai";
+import Groq from "groq-sdk";
 
 const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-const apiKey = process.env.GEMINI_API_KEY;
 
-if (!apiKey) {
-  console.error("GEMINI_API_KEY is missing from .env");
+// Check that the Groq API key exists
+if (!process.env.GROQ_API_KEY) {
+  console.error("Error: GROQ_API_KEY is missing from .env");
   process.exit(1);
 }
 
-const ai = new GoogleGenAI({
-  apiKey,
+// Initialize Groq once when the server starts
+const groq = new Groq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 app.get("/", (req, res) => {
-  res.send("Gemini API test server is running!");
+  res.send("Groq API test server is running!");
 });
 
-app.get("/test-gemini", async (req, res) => {
+app.get("/test-groq", async (req, res) => {
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3.8-flash",
-      contents: "Reply with exactly: Gemini API is working!",
+    const response = await groq.chat.completions.create({
+      model: "openai/gpt-oss-120b",
+      messages: [
+        {
+          role: "user",
+          content: "Reply with exactly: Groq API is working!",
+        },
+      ],
     });
 
-    res.status(200).json({
+    const aiResponse = response.choices[0]?.message?.content;
+
+    console.log("Groq response:", aiResponse);
+
+    return res.status(200).json({
       success: true,
-      message: "Gemini API key is working!",
-      aiResponse: response.text,
+      message: "Groq API request successful!",
+      aiResponse,
     });
   } catch (error) {
-    console.error("Gemini API error:", error.message);
+    console.error("Groq API error:", error.message);
 
-    res.status(500).json({
+    return res.status(error.status || 500).json({
       success: false,
-      message: "Gemini API request failed.",
+      message: "Groq API request failed.",
       error: error.message,
     });
   }
